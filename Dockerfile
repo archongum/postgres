@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-COPY . /workdir
+COPY ./* /workdir
 WORKDIR /workdir
 
 RUN apt-get update \

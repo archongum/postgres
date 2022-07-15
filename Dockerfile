@@ -84,7 +84,8 @@ ENV PG_VERSION 14.4-1.pgdg110+
 # postgres file
 COPY --from=builder /usr/local/pgsql/bin /usr/lib/postgresql/$PG_MAJOR/bin
 COPY --from=builder /usr/local/pgsql/lib /usr/lib/postgresql/$PG_MAJOR/lib
-COPY --from=builder /usr/local/pgsql/share /usr/share/postgresql/$PG_MAJOR
+COPY --from=builder /usr/local/pgsql/share /usr/lib/postgresql/$PG_MAJOR/share
+# COPY --from=builder /usr/local/pgsql/share /usr/share/postgresql/$PG_MAJOR
 COPY ./postgresql.conf /usr/share/postgresql/postgresql.conf.sample
 COPY ./docker-entrypoint.sh /usr/local/bin/
 # postgres lib

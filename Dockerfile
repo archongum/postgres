@@ -67,7 +67,7 @@ RUN set -eux; \
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 14
-ENV PATH $PATH:/usr/local/pgsql/bin
+ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PG_VERSION 14.4-1.pgdg110+
 
@@ -78,8 +78,13 @@ RUN apt-get update \
   && cd /workdir \
   && ./configure --with-blocksize=32 --with-wal-blocksize=32 \
   && make && make world-bin && make install-world-bin \
+  # Copy built files to default directory
+  && cp -r /usr/local/pgsql/bin/* /usr/lib/postgresql/$PG_MAJOR/bin/ \
+  && cp -r /usr/local/pgsql/lib/* /usr/lib/postgresql/$PG_MAJOR/lib/ \
+  && cp -r /usr/local/pgsql/share/* /usr/share/postgresql/$PG_MAJOR/ \
+  # && cp -r /usr/local/pgsql/include/* /usr/include/
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf ./* /var/lib/apt/lists/*
+  && rm -rf ./* /var/lib/apt/lists/* 
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 
@@ -91,6 +96,7 @@ VOLUME /var/lib/postgresql/data
 COPY postgresql.conf /usr/share/postgresql/postgresql.conf.sample
 
 COPY docker-entrypoint.sh /usr/local/bin/
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 STOPSIGNAL SIGINT

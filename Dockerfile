@@ -1,3 +1,13 @@
+FROM debian:bullseye-slim as builder
+
+# postgres compile
+COPY ./ /workdir
+RUN apt-get update \
+  && apt-get install -y build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc \
+  && cd /workdir \
+  && ./configure --with-blocksize=32 --with-wal-blocksize=32 \
+  && make && make world-bin && make install-world-bin
+
 FROM debian:bullseye-slim
 
 RUN set -ex; \
@@ -71,23 +81,14 @@ ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PG_VERSION 14.4-1.pgdg110+
 
-# postgres compile
-COPY ./ /workdir
-RUN apt-get update \
-  && apt-get install -y build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc \
-  && cd /workdir \
-  && ./configure --with-blocksize=32 --with-wal-blocksize=32 \
-  && make && make world-bin && make install-world-bin \
-  # Copy built files to default directory
-  && mkdir -p /usr/lib/postgresql/$PG_MAJOR/bin/ && cp -r /usr/local/pgsql/bin/* /usr/lib/postgresql/$PG_MAJOR/bin/ \
-  && mkdir -p /usr/lib/postgresql/$PG_MAJOR/lib/ && cp -r /usr/local/pgsql/lib/* /usr/lib/postgresql/$PG_MAJOR/lib/ \
-  && mkdir -p /usr/share/postgresql/$PG_MAJOR/ && cp -r /usr/local/pgsql/share/* /usr/share/postgresql/$PG_MAJOR/ \
-  # Copy other files
-  && cp -r ./postgresql.conf /usr/share/postgresql/postgresql.conf.sample \
-  && chmod +x ./docker-entrypoint.sh && cp -r ./docker-entrypoint.sh /usr/local/bin/ \
-  # && cp -r /usr/local/pgsql/include/* /usr/include/
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf ./* /var/lib/apt/lists/* /usr/local/pgsql
+# postgres file
+COPY --from=builder /usr/local/pgsql/bin /usr/lib/postgresql/$PG_MAJOR/
+COPY --from=builder /usr/local/pgsql/lib /usr/lib/postgresql/$PG_MAJOR/
+COPY --from=builder cp -r /usr/local/pgsql/share /usr/share/postgresql/$PG_MAJOR
+COPY ./postgresql.conf /usr/share/postgresql/postgresql.conf.sample
+COPY --chmod=755 ./docker-entrypoint.sh /usr/local/bin
+# postgres lib
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/lib/postgresql/$PG_MAJOR/lib
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 

@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bullseye-slim as builder
 
 COPY ./* /workdir
 WORKDIR /workdir
@@ -9,6 +9,9 @@ RUN apt-get update \
   && make && make world-bin && make install-world-bin \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf ./* /var/lib/apt/lists/*
+
+FROM debian:bullseye-slim
+COPY --from=builder /usr/local/pgsql /usr/local/
 
 ENV PATH $PATH:/usr/local/pgsql/bin
 ENV PG_MAJOR 14

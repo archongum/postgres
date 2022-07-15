@@ -7,7 +7,8 @@ RUN apt-get update \
   && apt-get install -y build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc \
   && ./configure --with-blocksize=32 --with-wal-blocksize=32 \
   && make && make world-bin && make install-world-bin \
-  && rm -rf ./*
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+  && rm -rf ./* /var/lib/apt/lists/*
 
 ENV PATH $PATH:/usr/local/pgsql/bin
 ENV PG_MAJOR 14

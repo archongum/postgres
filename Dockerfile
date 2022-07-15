@@ -82,6 +82,9 @@ RUN apt-get update \
   && mkdir -p /usr/lib/postgresql/$PG_MAJOR/bin/ && cp -r /usr/local/pgsql/bin/* /usr/lib/postgresql/$PG_MAJOR/bin/ \
   && mkdir -p /usr/lib/postgresql/$PG_MAJOR/lib/ && cp -r /usr/local/pgsql/lib/* /usr/lib/postgresql/$PG_MAJOR/lib/ \
   && mkdir -p /usr/share/postgresql/$PG_MAJOR/ && cp -r /usr/local/pgsql/share/* /usr/share/postgresql/$PG_MAJOR/ \
+  # Copy other files
+  && cp -r ./postgresql.conf /usr/share/postgresql/postgresql.conf.sample \
+  && chmod +x ./docker-entrypoint.sh && cp -r ./docker-entrypoint.sh /usr/local/bin/ \
   # && cp -r /usr/local/pgsql/include/* /usr/include/
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf ./* /var/lib/apt/lists/* /usr/local/pgsql
@@ -92,10 +95,6 @@ ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
 RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
 VOLUME /var/lib/postgresql/data
-
-COPY postgresql.conf /usr/share/postgresql/postgresql.conf.sample
-
-COPY docker-entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

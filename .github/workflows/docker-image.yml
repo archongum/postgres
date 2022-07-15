@@ -25,6 +25,8 @@ jobs:
         run: |
           # show size
           du -sh ./*
+          # chmod +x
+          chmod +x ./*.sh
           # build
           docker build -f Dockerfile --tag $IMAGE_NAME .
           # show images

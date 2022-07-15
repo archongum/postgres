@@ -79,12 +79,12 @@ RUN apt-get update \
   && ./configure --with-blocksize=32 --with-wal-blocksize=32 \
   && make && make world-bin && make install-world-bin \
   # Copy built files to default directory
-  && cp -r /usr/local/pgsql/bin/* /usr/lib/postgresql/$PG_MAJOR/bin/ \
-  && cp -r /usr/local/pgsql/lib/* /usr/lib/postgresql/$PG_MAJOR/lib/ \
-  && cp -r /usr/local/pgsql/share/* /usr/share/postgresql/$PG_MAJOR/ \
+  && mkdir -p /usr/lib/postgresql/$PG_MAJOR/bin/ && cp -r /usr/local/pgsql/bin/* /usr/lib/postgresql/$PG_MAJOR/bin/ \
+  && mkdir -p /usr/lib/postgresql/$PG_MAJOR/lib/ && cp -r /usr/local/pgsql/lib/* /usr/lib/postgresql/$PG_MAJOR/lib/ \
+  && mkdir -p /usr/share/postgresql/$PG_MAJOR/ && cp -r /usr/local/pgsql/share/* /usr/share/postgresql/$PG_MAJOR/ \
   # && cp -r /usr/local/pgsql/include/* /usr/include/
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf ./* /var/lib/apt/lists/* 
+  && rm -rf ./* /var/lib/apt/lists/* /usr/local/pgsql
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 

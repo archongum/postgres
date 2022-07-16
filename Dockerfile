@@ -87,7 +87,9 @@ COPY --from=builder /usr/local/pgsql/lib /usr/lib/postgresql/$PG_MAJOR/lib
 COPY --from=builder /usr/local/pgsql/share /usr/lib/postgresql/$PG_MAJOR/share
 COPY ./postgresql.conf /usr/lib/postgresql/$PG_MAJOR/share/postgresql.conf.sample
 COPY ./docker-entrypoint.sh /usr/local/bin/
-RUN mkdir -p /usr/share/postgresql/ && ln -s /usr/lib/postgresql/$PG_MAJOR/share /usr/share/postgresql/$PG_MAJOR
+RUN mkdir -p /usr/share/postgresql/ && ln -s /usr/lib/postgresql/$PG_MAJOR/share /usr/share/postgresql/$PG_MAJOR \
+  # for citus
+  && ln -s /usr/lib/postgresql/$PG_MAJOR/share/postgresql.conf.sample /usr/share/postgresql/postgresql.conf.sample
 
 # postgres lib
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/lib/postgresql/$PG_MAJOR/lib
